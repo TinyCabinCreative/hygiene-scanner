@@ -1,0 +1,9 @@
+# Identity Hygiene Scanner Dependencies
+# SECURITY: All versions pinned for reproducible builds
+
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Development dependencies (optional)
+# pytest==7.4.3
+# pytest-flask==1.3.0

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Identity Hygiene Scanner - Evaluate password strength, username patterns, and MFA readiness">
+    <!-- SECURITY: Content Security Policy already set via Flask headers -->
+    <title>Identity Hygiene Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Identity Hygiene Scanner</h1>
+            <p class="tagline">Evaluate your digital identity security locally and privately</p>
+            <div class="security-notice">
+                <strong>🛡️ Privacy First:</strong> All analysis happens in your browser. No data is sent to external servers or stored.
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-button active" data-tab="password">Password Strength</button>
+            <button class="tab-button" data-tab="username">Username Analysis</button>
+            <button class="tab-button" data-tab="mfa">MFA Readiness</button>
+        </nav>
+
+        <!-- Password Strength Tab -->
+        <div id="password-tab" class="tab-content active">
+            <section class="card">
+                <h2>Password Strength Analyzer</h2>
+                <p class="section-description">
+                    Check your password against common vulnerabilities and breach patterns.
+                    <strong>Note:</strong> Your password is never stored or logged.
+                </p>
+                
+                <div class="form-group">
+                    <label for="password-input">Enter Password to Analyze</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="password-input" 
+                            placeholder="Enter a password to check..."
+                            autocomplete="off"
+                            maxlength="256"
+                        >
+                        <button type="button" class="toggle-visibility" id="toggle-password">
+                            👁️ Show
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" id="check-password-btn">Analyze Password</button>
+                </div>
+
+                <div id="password-results" class="results hidden">
+                    <div class="strength-meter">
+                        <div class="strength-bar" id="strength-bar"></div>
+                    </div>
+                    <div class="strength-label" id="strength-label"></div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <span class="metric-label">Score</span>
+                            <span class="metric-value" id="password-score">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Length</span>
+                            <span class="metric-value" id="password-length">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Entropy</span>
+                            <span class="metric-value" id="password-entropy">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Crack Time</span>
+                            <span class="metric-value" id="crack-time">-</span>
+                        </div>
+                    </div>
+
+                    <div class="character-types">
+                        <span class="type-badge" id="has-lowercase">Lowercase</span>
+                        <span class="type-badge" id="has-uppercase">Uppercase</span>
+                        <span class="type-badge" id="has-digits">Numbers</span>
+                        <span class="type-badge" id="has-special">Symbols</span>
+                    </div>
+
+                    <div class="issues-section">
+                        <h3>⚠️ Issues Detected</h3>
+                        <ul id="password-issues"></ul>
+                    </div>
+
+                    <div class="recommendations-section">
+                        <h3>💡 Recommendations</h3>
+                        <ul id="password-recommendations"></ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Username Analysis Tab -->
+        <div id="username-tab" class="tab-content">
+            <section class="card">
+                <h2>Username & Email Analyzer</h2>
+                <p class="section-description">
+                    Identify enumeration risks and privacy concerns in your username and email.
+                </p>
+                
+                <div class="form-group">
+                    <label for="username-input">Username</label>
+                    <input 
+                        type="text" 
+                        id="username-input" 
+                        placeholder="Enter username..."
+                        maxlength="128"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email-input">Email (Optional)</label>
+                    <input 
+                        type="email" 
+                        id="email-input" 
+                        placeholder="Enter email address..."
+                        maxlength="254"
+                    >
+                </div>
+
+                <button class="btn btn-primary" id="check-username-btn">Analyze Username</button>
+
+                <div id="username-results" class="results hidden">
+                    <div class="risk-level-banner" id="risk-level-banner">
+                        <span class="risk-label" id="risk-label"></span>
+                    </div>
+
+                    <div class="info-box">
+                        <h3>🎯 Enumeration Risk</h3>
+                        <p id="enumeration-risk"></p>
+                    </div>
+
+                    <div class="issues-section">
+                        <h3>⚠️ Issues Detected</h3>
+                        <ul id="username-issues"></ul>
+                    </div>
+
+                    <div class="warnings-section" id="username-warnings-section">
+                        <h3>⚡ Warnings</h3>
+                        <ul id="username-warnings"></ul>
+                    </div>
+
+                    <div class="recommendations-section">
+                        <h3>💡 Recommendations</h3>
+                        <ul id="username-recommendations"></ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- MFA Readiness Tab -->
+        <div id="mfa-tab" class="tab-content">
+            <section class="card">
+                <h2>Multi-Factor Authentication (MFA) Readiness</h2>
+                <p class="section-description">
+                    MFA is one of the most effective security controls. According to Microsoft, 
+                    it blocks 99.9% of automated attacks.
+                </p>
+
+                <div class="info-box info-box-primary">
+                    <h3>📊 What is MFA?</h3>
+                    <p>
+                        Multi-Factor Authentication requires multiple forms of verification before granting access.
+                        It combines "something you know" (password) with "something you have" (phone/key) or 
+                        "something you are" (biometrics).
+                    </p>
+                </div>
+
+                <div class="mfa-methods">
+                    <h3>🔐 MFA Methods Ranked by Security</h3>
+                    <div id="mfa-methods-list"></div>
+                </div>
+
+                <div class="mfa-assessment">
+                    <h3>📋 Assess Your Current Setup</h3>
+                    <p>Select the MFA methods you currently use:</p>
+                    <div id="mfa-method-checkboxes" class="checkbox-group"></div>
+                    <button class="btn btn-primary" id="assess-mfa-btn">Assess My Setup</button>
+                    <div id="mfa-assessment-results" class="results hidden"></div>
+                </div>
+
+                <div class="mfa-checklist">
+                    <h3>✅ MFA Implementation Checklist</h3>
+                    
+                    <div class="checklist-section">
+                        <h4>🎯 Preparation Phase</h4>
+                        <ul id="checklist-preparation"></ul>
+                    </div>
+
+                    <div class="checklist-section">
+                        <h4>🚀 Implementation Phase</h4>
+                        <ul id="checklist-implementation"></ul>
+                    </div>
+
+                    <div class="checklist-section">
+                        <h4>🛡️ Best Practices</h4>
+                        <ul id="checklist-best-practices"></ul>
+                    </div>
+
+                    <div class="critical-accounts">
+                        <h4>🎯 Priority Accounts for MFA</h4>
+                        <ul id="critical-accounts-list"></ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>
+                <strong>Security Notice:</strong> This tool performs all analysis locally in your browser. 
+                No passwords, usernames, or emails are transmitted to any server or stored anywhere.
+            </p>
+            <p class="version">Version 1.0.0 | Open Source Security Tool</p>
+        </footer>
+    </div>
+
+    <!-- SECURITY: All scripts are from same origin (no external CDN for security) -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
